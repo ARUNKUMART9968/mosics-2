@@ -1,0 +1,37 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+model Teacher {
+  id               Int       @id @default(autoincrement())
+  email            String    @unique
+  password         String
+  resetToken       String?
+  resetTokenExpiry DateTime?
+}
+
+model Student {
+  id                Int    @id @default(autoincrement())
+  name              String
+  regNo             String @unique
+  attendancePercent Float  @default(0)
+  marks             Marks?
+}
+
+model Marks {
+  id         Int     @id @default(autoincrement())
+  studentId  Int     @unique
+  subject1   Float   @default(0)
+  subject2   Float   @default(0)
+  subject3   Float   @default(0)
+  subject4   Float   @default(0)
+  subject5   Float   @default(0)
+  total      Float   @default(0)
+  percentage Float   @default(0)
+  student    Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
