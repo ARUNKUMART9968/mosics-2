@@ -5,14 +5,16 @@ import Icon, { Icons } from "./Icon";
 //   page      - currently active page key
 //   setPage   - function to change page
 //   onLogout  - called when Sign Out is clicked
+//   isActive  - boolean: whether the current teacher is active
 
 const navItems = [
   { key: "dashboard", label: "Dashboard", icon: Icons.dashboard },
   { key: "students",  label: "Students",  icon: Icons.students  },
   { key: "ranking",   label: "Rankings",  icon: Icons.trophy    },
+  { key: "profile",   label: "My Profile", icon: Icons.user     },
 ];
 
-function Sidebar({ page, setPage, onLogout }) {
+function Sidebar({ page, setPage, onLogout, isActive }) {
   return (
     <aside className="sidebar">
       {/* Logo */}
@@ -30,8 +32,45 @@ function Sidebar({ page, setPage, onLogout }) {
         >
           <Icon d={n.icon} size={16} />
           {n.label}
+
+          {/* Show status dot on Profile item */}
+          {n.key === "profile" && (
+            <span
+              style={{
+                marginLeft: "auto",
+                width: 8,
+                height: 8,
+                borderRadius: "50%",
+                background: isActive ? "var(--accent3)" : "#ff6b6b",
+                flexShrink: 0,
+              }}
+              title={isActive ? "Active" : "Inactive"}
+            />
+          )}
         </button>
       ))}
+
+      {/* Inactive status chip at bottom of nav */}
+      {!isActive && (
+        <div
+          style={{
+            margin: "8px 4px",
+            padding: "8px 12px",
+            borderRadius: 8,
+            background: "rgba(255,68,68,0.08)",
+            border: "1px solid rgba(255,68,68,0.2)",
+            fontSize: 12,
+            color: "#ff6b6b",
+            fontWeight: 500,
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+          }}
+        >
+          <span style={{ fontSize: 10 }}>●</span>
+          Inactive Mode
+        </div>
+      )}
 
       {/* Logout at bottom */}
       <div className="sidebar-bottom">
