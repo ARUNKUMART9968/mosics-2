@@ -6,17 +6,17 @@ import { getAllStudents, deleteStudent } from "../api/api";
 
 // Students page — full CRUD for students + marks entry
 // Props:
-//   toast - function(msg, type) to show notifications
+//   toast    - function(msg, type) to show notifications
+//   isActive - boolean: whether current teacher can write
 
-function StudentsPage({ toast }) {
-  const [students, setStudents]       = useState([]);
-  const [loading, setLoading]         = useState(true);
-  const [search, setSearch]           = useState("");
-  const [showAdd, setShowAdd]         = useState(false);   // Add modal open
-  const [editStudent, setEditStudent] = useState(null);    // Edit modal student
-  const [marksStudent, setMarksStudent] = useState(null);  // Marks modal student
+function StudentsPage({ toast, isActive }) {
+  const [students, setStudents]         = useState([]);
+  const [loading, setLoading]           = useState(true);
+  const [search, setSearch]             = useState("");
+  const [showAdd, setShowAdd]           = useState(false);
+  const [editStudent, setEditStudent]   = useState(null);
+  const [marksStudent, setMarksStudent] = useState(null);
 
-  // Fetch all students from backend
   const load = useCallback(async () => {
     setLoading(true);
     try {
@@ -30,8 +30,11 @@ function StudentsPage({ toast }) {
 
   useEffect(() => { load(); }, [load]);
 
-  // Delete a student after confirmation
   const handleDelete = async (id, name) => {
+    if (!isActive) {
+      toast("You are inactive. Activate your account to delete students.", "error");
+      return;
+    }
     if (!window.confirm(`Delete student "${name}"?`)) return;
     try {
       await deleteStudent(id);
@@ -42,11 +45,33 @@ function StudentsPage({ toast }) {
     }
   };
 
-  // Attendance badge color
+  const handleAddClick = () => {
+    if (!isActive) {
+      toast("You are inactive. Activate your account to add students.", "error");
+      return;
+    }
+    setShowAdd(true);
+  };
+
+  const handleEditClick = (student) => {
+    if (!isActive) {
+      toast("You are inactive. Activate your account to edit students.", "error");
+      return;
+    }
+    setEditStudent(student);
+  };
+
+  const handleMarksClick = (student) => {
+    if (!isActive) {
+      toast("You are inactive. Activate your account to enter marks.", "error");
+      return;
+    }
+    setMarksStudent(student);
+  };
+
   const attBadge = (pct) =>
     pct >= 75 ? "green" : pct >= 50 ? "yellow" : "red";
 
-  // Filter students by search input
   const filtered = students.filter(
     (s) =>
       s.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -72,7 +97,14 @@ function StudentsPage({ toast }) {
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <button className="btn sm" onClick={() => setShowAdd(true)}>
+
+        <button
+          className="btn sm"
+          onClick={handleAddClick}
+          disabled={!isActive}
+          title={!isActive ? "Activate your account to add students" : ""}
+          style={{ opacity: isActive ? 1 : 0.45, cursor: isActive ? "pointer" : "not-allowed" }}
+        >
           <Icon d={Icons.plus} size={14} /> Add Student
         </button>
       </div>
@@ -128,27 +160,39 @@ function StudentsPage({ toast }) {
                         {/* Marks button */}
                         <button
                           className="btn sm secondary"
-                          style={{ padding: "6px 12px" }}
-                          onClick={() => setMarksStudent(s)}
-                          title="Enter Marks"
+                          style={{
+                            padding: "6px 12px",
+                            opacity: isActive ? 1 : 0.4,
+                            cursor: isActive ? "pointer" : "not-allowed",
+                          }}
+                          onClick={() => handleMarksClick(s)}
+                          title={isActive ? "Enter Marks" : "Inactive — cannot edit"}
                         >
                           <Icon d={Icons.book} size={13} />
                         </button>
                         {/* Edit button */}
                         <button
                           className="btn sm secondary"
-                          style={{ padding: "6px 12px" }}
-                          onClick={() => setEditStudent(s)}
-                          title="Edit"
+                          style={{
+                            padding: "6px 12px",
+                            opacity: isActive ? 1 : 0.4,
+                            cursor: isActive ? "pointer" : "not-allowed",
+                          }}
+                          onClick={() => handleEditClick(s)}
+                          title={isActive ? "Edit" : "Inactive — cannot edit"}
                         >
                           <Icon d={Icons.edit} size={13} />
                         </button>
                         {/* Delete button */}
                         <button
                           className="btn sm danger"
-                          style={{ padding: "6px 12px" }}
+                          style={{
+                            padding: "6px 12px",
+                            opacity: isActive ? 1 : 0.4,
+                            cursor: isActive ? "pointer" : "not-allowed",
+                          }}
                           onClick={() => handleDelete(s.id, s.name)}
-                          title="Delete"
+                          title={isActive ? "Delete" : "Inactive — cannot delete"}
                         >
                           <Icon d={Icons.trash} size={13} />
                         </button>
